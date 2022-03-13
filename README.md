@@ -1,6 +1,10 @@
 # ProblemeDesHuitsDames
 Résolution du problème des huits en Java en utilisant une technique de backtracking.
 
+## Objectif
+
+>Sur un plateau d'échec 8x8, placer 8 dames de manière à ce qu'aucune d'entre-elle ne puisse en capturer une autre, il existe 92 solutions, l'exercice est de les trouver et de les afficher.
+
 - [x] Résoudre le problème des huits dames 
 - [ ] Trouver toutes les solutions
 - [x] Utiliser une technique de backtracking
@@ -8,9 +12,11 @@ Résolution du problème des huits en Java en utilisant une technique de backtra
 - [x] Projet documenté
 - [x] Générer javadoc
 
-80% Pertinence de la solution
+### Points pertinents
 
-50% Utilisation des bonnes pratiques de programmation
+* Résoudre par moyen de backtracking pour résoudre le problème
+* Nommage compréhensif des méthodes
+* Bonne utilisation des commentaires
 
 
 ### Points à améliorer
@@ -20,7 +26,9 @@ Résolution du problème des huits en Java en utilisant une technique de backtra
 * Faire une approche différente, moins complexe pour traiter le problème
 * Adapater le code pour N cases
 * Rendre le code évolutif
+* Utiliser d'avantage les bonnes pratiques de programmation
 * Vérifier la complexité algorithmique
+* Commenter en anglais
 
 
 ### Commentaire du développeur
