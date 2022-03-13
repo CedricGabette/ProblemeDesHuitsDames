@@ -20,6 +20,7 @@ Résolution du problème des huits en Java en utilisant une technique de backtra
 * Faire une approche différente, moins complexe pour traiter le problème
 * Adapater le code pour N cases
 * Rendre le code évolutif
+* Vérifier la complexité algorithmique
 
 
 ### Commentaire du développeur
