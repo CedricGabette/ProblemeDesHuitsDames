@@ -1,106 +1,72 @@
 package com.cedric.fr;
 
-import java.util.ArrayList;
-import java.util.List;
+/*
+ * Class Services, regroupe toutes les méthodes qui agissent directement sur les dames
+ */
 
-public class Services {
+public class Services extends Utils{
 
+	
+	
 	//TODO Arranger la fonction pour obtenir les 92 solutions, il faut pouvoir tester toutes les positions des reines sur leur ligne
-	
-	//TODO Attention, répétitions de code pour parcourir le tableau afin d'identifier des élements
-	
-	//TODO Séparer les méthodes dans des classes adaptés
 	
 	//TODO Attention, on rentre systématiquement le paramètre String[] tabChess dans les méthodes
 	
 	/**
 	 * @Author, GABETTE Cédric
-	 * Fonction principale qui apporte la solution, en appelant les autres fonctions.
+	 * Fonction principale qui apporte une solution, en appelant les autres fonctions.
 	 * @param String[] tabChess, le plateau actuel avec les reines placées
 	 * @param square, on force le placement d'une dame sur la case donnée
 	 * @return void
 	 * 
 	 */
-	public static void solution(String[] tabChess, int square) {
+	public static void solution(String[] tabChess) {
 		boolean foundSolution = false;
-		boolean boucle = true;
-		boolean disable = false;
+		boolean alreadyExists = false;
+		boolean loop = true;
+		boolean loop2 = true;
+		int nbrSolution = 0;
+		int i = 0;
+		String tabMem[][] = new String[100][64];
 
-		if(square < 0) {		//Pour laisser la fonction actionQueen placer une reine sur la case 0
-			disable = true;
-		} 
-		else if(square >= 0)
-		{
-			disable = false;
-		}
-		
-		if(!disable) {						//On bloque les cases qui précèdent la case que l'on cible seulement sur sa ligne
-			for(int i=0;i<=square;i++) {
-				tabChess[i] = "b";
-			}					
-		}
+		while(i<94) {
 
-		if(square > 6 && square < 17) {		//Dans le cas ou on agit seulement sur la seconde ligne
-
-			for(int i=0;i<=7;i++) {
-				tabChess[i] = "o";
-			}		
-			for(int i=12;i<=square;i++) {
-				tabChess[i] = "b";
-			}				
-		}
-
-		while(boucle) {				
-			actionQueen(tabChess, "addQueen");		//On essaye de poser toutes les reines
-			foundSolution = isSuccess(tabChess);	//Retourne true si on trouve les 8 reines sur le plateau
-			if(foundSolution) {
-				boucle = false;
+			while(loop) {				
+				actionQueen(tabChess, "addQueen");		//On essaye de poser toutes les reines
+				foundSolution = isSuccess(tabChess);	//Retourne true si on trouve les 8 reines sur le plateau
+				if(foundSolution) {
+					loop = false;
+				}
 			}
-		}
-		getRidOfb(tabChess);		//Retire toutes les cases bloquantes inutiles
-		display(tabChess);			//Affiche le plateau d'échec
-	}
-
-
-	/**
-	 * @Author, GABETTE Cédric
-	 * Vérifie si la solution actuel existe déjà dans la liste des solutions trouvées
-	 * @param String[]tabChess, le plateau actuel avec les reines placées
-	 * @param String[]tabMem, un tableau qui va contenir toutes les solutions touvées
-	 * @return true, si une solution existe déjà
-	 */
-	public static boolean alreadyExists(String[] tabChess, String[] tabMem) {
-		boolean ret = false;
-		int count = 0;
-
-		for(int i=0;i<tabChess.length;i++) {	//On parcourt toutes les cases du plateau et on comptabilise à chaque fois qu'il y a une
-			if(tabChess[i] == tabMem[i]) {		//similitude
-				count++;
+			getRidOfInterdictions(tabChess);		//Retire toutes les cases bloquantes inutiles
+			
+			for(int k=0;k<nbrSolution && loop2;k++) {
+				if(isAlreadyExists(tabChess, tabMem[k])) {
+					tabChess = findRoomOnRow(tabChess);
+					loop2 = false;
+					alreadyExists = true;
+				} 		
 			}
+			
+			if(!alreadyExists) {				
+				tabMem[nbrSolution] = memorize(tabChess);
+				nbrSolution++;
+			}
+			
+			alreadyExists = false;			//On reinitialise pour rentrer à nouveau dans la boucle d'actionQueen et de isAlreadyExists
+			loop = true;
+			loop2 = true;
+			i++;
 		}
-
-		if(count == tabChess.length) {		//Si toutes les cases du plateau sont identiques
-			ret = true;
+		for(int j=0;j<=92;j++) {
+			System.out.println("Solution " + (j+1));
+			display(tabMem[j]);
 		}
-
-		return ret;
 	}
 
-	/**
-	 * @Author, GABETTE Cédric
-	 * Permet de mémoriser un plateau avec toutes les positions des dames dans un tableau
-	 * @param String[]tabChess, le plateau actuel avec les reines placées
-	 * @return, un plateau copié du tableau donné en paramètre
- 	 */
-	public static String[] memorize(String[] tabChess) {
+	
 
-		String[] tabMem = new String[tabChess.length];
 
-		for(int i=0;i<64;i++) {
-			tabMem[i] = tabChess[i];		//On copie toutes les cases du plateau
-		}
-		return tabMem;
-	}
 
 	
 	/**
@@ -224,43 +190,9 @@ public class Services {
 		return tabChess;
 	}
 
-	/**
-	 * @Author, GABETTE Cédric
-	 * Rafraichît les captures sur les cases vides suite au retirement d'une reine
-	 * @param String[] tabChess, le plateau actuel avec les reines placées
-	 * @return void
-	 */
-	public static void refreshBoard(String[] tabChess) {
-		int square = 0;
 
-		for(square=0;square<tabChess.length;square++) {		//On parcourt toutes les cases du plateau pour trouver une reine
-			if(tabChess[square] == "D") {
-				queenModel(square, tabChess, "refresh");	//Appel de la méthode queenModel pour modifier le plateau
-			}
-		}
-	}
 
-	/**
-	 * @Author, GABETTE Cédric
-	 * Vérifie si il y a les 8 reines de placée sur le plateau
-	 * @param, String[] tabChess, le plateau actuel avec les reines placées
-	 * @return true, si on a 8 reines
-	 */
-	public static boolean isSuccess(String[] tabChess){
-		int success = 0;
-		boolean ret = false;
 
-		for(String elem : tabChess) {
-			if(elem == "D") {		//On comptabilise à chaque fois que l'on trouve une reine
-				success++;	
-			}
-		}
-
-		if(success == 8) {
-			ret = true;
-		}
-		return ret;
-	}
 
 	/**
 	 * @Author, GABETTE Cédric
@@ -319,106 +251,61 @@ public class Services {
 		return tabChess;
 	}
 
-
 	/**
 	 * @Author, GABETTE Cédric
-	 * Enlève les interdictions des cases sur toutes les cases en dessous de la ligne courant pour pouvoir placer une dame dessus
-	 * @param String[] tabChess, le plateau actuel avec les reines placées
-	 * @param int MAX, 
-	 * @param int startRow, la case la plus à gauche de la ligne courante
-	 * @return void
-	 */
-	public static void endFreeze(String[] tabChess, int MAX, int startRow) {
-
-		for(int i=0;i<(MAX-startRow);i++) {		//On retire les interdictions sur les cases sauf sur la ligne courante
-			if(tabChess[(startRow+i)] == "b") {
-				tabChess[(startRow+i)] = "o";
-			}
-		}
-	}
-
-	/**
-	 * @Author, GABETTE Cédric
-	 * Permet de retirer toutes les cases bloquantes inutiles
+	 * Rafraichît les captures sur les cases vides suite au retirement d'une reine
 	 * @param String[] tabChess, le plateau actuel avec les reines placées
 	 * @return void
 	 */
-	public static void getRidOfb(String[] tabChess) {
-		for(int i=0;i<tabChess.length;i++) {
-			if(tabChess[i] == "b") {
-				tabChess[i] = ".";
+	public static void refreshBoard(String[] tabChess) {
+		int square = 0;
+
+		for(square=0;square<tabChess.length;square++) {		//On parcourt toutes les cases du plateau pour trouver une reine
+			if(tabChess[square] == "D") {
+				queenModel(square, tabChess, "refresh");	//Appel de la méthode queenModel pour modifier le plateau
 			}
 		}
 	}
 	
 
-//	//TODO Utiliser cette méthode pour trouver les 92 solutions
-//	/**
-//	 * @Author, GABETTE Cédric
-//	 * Permet de remonter les lignes de plateau et de trouver une autre case vide sur la même ligne où se trouve déjà une reine
-//	 * @param String[] tabChess, le plateau actuel avec les reines placées
-//	 * @return, le tableau avec le prochain coups à jouer sur la même ligne où une dame a été jouée
-//	 */
-//
-//	public static String[] findAgain(String[] tabChess) {
-//
-//		int MAX = tabChess.length-1;
-//		int startRow = 0;
-//		boolean boucle = true;
-//
-//		while(boucle) {				
-//			backTracking(tabChess);
-//			for(int curr=MAX;curr>=0;curr--) {		//curr = position de la dernière reine
-//				if(tabChess[curr] == "b") {
-//					startRow = (curr - (curr%8));		//On se place le plus à gauche sur la ligne actuelle
-//					for(int i=startRow;i<startRow+8;i++) {
-//						if(tabChess[i] == "o") {
-//							boucle = false;
-//							break;
-//						}
-//					}
-//				}
-//			}
-//			MAX = MAX - 8;
-//		}
-//		System.out.println("New start");
-//
-//		return tabChess;
-//	}
+
+	
 
 	/**
 	 * @Author, GABETTE Cédric
-	 * Retire les cases vides inutiles
+	 * Permet de remonter les lignes du plateau et de trouver une autre case vide sur la même ligne où se trouve déjà une reine
 	 * @param String[] tabChess, le plateau actuel avec les reines placées
-	 * @return, le tableau sans les cases vides inutiles
+	 * @return, le tableau avec le prochain coups à jouer sur la même ligne où une dame a été jouée
 	 */
-	public static String[] cleanBoard(String[] tabChess) {
-		for(int i=0;i<tabChess.length;i++) {
-			tabChess[i] = "o";
+
+	public static String[] findRoomOnRow(String[] tabChess) {
+
+		int MAX = tabChess.length-1;
+		int startRow = 0;
+		boolean boucle = true;
+
+		while(boucle) {				
+			backTracking(tabChess);
+			for(int curr=MAX;curr>=0;curr--) {		//curr = position de la dernière reine
+				if(tabChess[curr] == "b") {
+					startRow = (curr - (curr%8));		//On se place le plus à gauche sur la ligne actuelle
+					for(int i=startRow;i<startRow+8;i++) {
+						if(tabChess[i] == "o") {
+							boucle = false;
+							break;
+						}
+					}
+				}
+			}
+			MAX = MAX - 8;
 		}
+
 		return tabChess;
 	}
-	
-	/**
-	 * @Author, GABETTE Cédric
-	 * Affiche le plateau
-	 * @param String[] tabChess, le plateau actuel avec les reines placées
-	 * @return void
-	 */
-	
-	public static void display(String[] tabChess) {
-		int k = 0;
-	
-		for(int i=0;i<8;i++) {
-			System.out.println("");
 
-			for(int j=0;j<8;j++) {
-				System.out.print("  " + tabChess[(k+j)]);
-			}
-			k+=8;
-		}
-		System.out.println("");
-	}
+	
+	
+
 
 }
 
